@@ -42,18 +42,51 @@ export class PostsService {
   }
 
   async getPost(id: number) {
-    const post = await this.postsRepository.findOneBy({ id });
+    const post = await this.postsRepository.findOne({
+      where: { id },
+      relations: { user: true },
+      select: {
+        id: true,
+        content: true,
+        user: {
+          username: true,
+        },
+      },
+    });
     if (!post) {
       throw new NotFoundException();
     }
+    return { id: post.id, content: post.content, postedBy: post.user.username };
+  }
+
+  async getPostOwner(id: number) {
+    const post = await this.postsRepository.findOne({
+      where: { id },
+      relations: { user: true },
+      select: {
+        user: {
+          id: true,
+        },
+      },
+    });
+
     return post;
   }
 
-  updatePost() {
-    return 'updating post';
+  async updatePost(body: PostMutate, id: number) {
+    await this.postsRepository.update(id, body);
+    const post = await this.getPost(id);
+    return post;
   }
 
-  deletePost() {
-    return 'delete a post';
+  async deletePost(id: number) {
+    const post = await this.postsRepository.findOne({ where: { id } });
+    if (!post) {
+      throw new NotFoundException(
+        'The resource you are trying to delete does not exist',
+      );
+    }
+    await this.postsRepository.delete(id);
+    return { message: 'Item deleted successfully' };
   }
 }

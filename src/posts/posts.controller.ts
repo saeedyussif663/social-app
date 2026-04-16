@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { type Request } from 'express';
 import { AuthGuard } from 'src/guards/auth.guard';
+import { OwnershipGuard } from 'src/guards/ownership.guard';
 import { createPostDto } from './dto/post.dto';
 import { PostsService } from './posts.service';
 
@@ -36,13 +37,14 @@ export class PostsController {
     return this.postsService.getPost(param.id);
   }
 
+  @UseGuards(AuthGuard, OwnershipGuard)
   @Patch(':id')
-  updatePost() {
-    return this.postsService.updatePost();
+  updatePost(@Body() body: createPostDto, @Param() param: { id: number }) {
+    return this.postsService.updatePost(body, param.id);
   }
 
   @Delete(':id')
-  deletePost() {
-    return this.postsService.deletePost();
+  deletePost(@Param() param: { id: number }) {
+    return this.postsService.deletePost(param.id);
   }
 }
