@@ -19,7 +19,7 @@ export class OwnershipGuard implements CanActivate {
 
     const post = await this.postsService.getPostOwner(postId);
 
-    if (post?.id !== userId) {
+    if (post?.user.id !== userId) {
       throw new ForbiddenException('You can only delete your own posts');
     }
 
